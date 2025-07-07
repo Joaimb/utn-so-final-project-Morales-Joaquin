@@ -5,6 +5,35 @@
     <title>Estudiantes</title>
     <link rel="stylesheet" href="styles_modern.css">
   </head>
+  <script>
+    document.getElementById('btn-agregar').addEventListener('click', async () => {
+      const nombre = document.getElementById('nuevo-nombre').value;
+      if (!nombre) {
+        document.getElementById('mensaje-agregar').innerText = "Por favor, escribí un nombre.";
+        return;
+      }
+      try {
+        const res = await fetch('/students', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nombre })
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          document.getElementById('mensaje-agregar').innerText = data.error || "Error al agregar.";
+          return;
+        }
+        const data = await res.json();
+        document.getElementById('mensaje-agregar').innerText = `Estudiante agregado: ${data.name} (ID: ${data.id})`;
+        document.getElementById('nuevo-nombre').value = '';
+        // Si tenés una función para recargar la tabla de estudiantes, llamala acá:
+        if (typeof cargarEstudiantes === 'function') cargarEstudiantes();
+      } catch (e) {
+        document.getElementById('mensaje-agregar').innerText = "Error al conectar con el servidor.";
+      }
+    });
+  </script>
+  
   <body>
     <div id="saludo-app">
       <input type="text" id="nombre" placeholder="Escribí tu nombre">
@@ -40,6 +69,12 @@
       </thead>
       <tbody></tbody>
     </table>
+    <div id="agregar-estudiante">
+      <input type="text" id="nuevo-nombre" placeholder="Nombre del estudiante">
+      <button id="btn-agregar">Agregar Estudiante</button>
+      <div id="mensaje-agregar"></div>
+    </div>
+    
     <script src="script.js"></script>
   </body>
 </html>
